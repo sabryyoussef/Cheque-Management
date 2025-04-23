@@ -1,32 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <!-- Search View -->
+    <!-- Advanced Search View -->
     <record id="view_cheque_management_search" model="ir.ui.view">
         <field name="name">cheque.management.search</field>
         <field name="model">cheque.management</field>
         <field name="arch" type="xml">
             <search>
+                <!-- Search Panel for Multiple Search Boxes -->
+                <searchpanel>
+                    <field name="state" string="Status" enable_counters="1"/>
+                    <field name="type" string="Type" enable_counters="1"/>
+                    <field name="bank_id" string="Bank" enable_counters="1"/>
+                </searchpanel>
+
+                <!-- Regular Search Fields -->
                 <field name="name" string="Cheque Number"/>
                 <field name="partner_id" string="Partner"/>
                 <field name="amount" string="Amount"/>
                 
-                <filter string="Cheque Date" name="date_filter" date="date"/>
-                <filter string="Due Date" name="due_date_filter" date="due_date"/>
+                <!-- Date Range Filters -->
+                <filter name="date_filter" string="Cheque Date"
+                        domain="[]"
+                        context="{'group_by': 'date'}"/>
+                <filter name="due_date_filter" string="Due Date"
+                        domain="[]"
+                        context="{'group_by': 'due_date'}"/>
                 
-                <separator/>
-                <filter string="Draft" name="draft_cheques" domain="[('state', '=', 'draft')]"/>
-                <filter string="Registered" name="registered_cheques" domain="[('state', '=', 'registered')]"/>
-                <filter string="Cleared" name="cleared_cheques" domain="[('state', '=', 'cleared')]"/>
+                <!-- Status Filters -->
+                <filter name="draft_cheques" string="Draft" domain="[('state', '=', 'draft')]"/>
+                <filter name="registered_cheques" string="Registered" domain="[('state', '=', 'registered')]"/>
+                <filter name="cleared_cheques" string="Cleared" domain="[('state', '=', 'cleared')]"/>
                 
-                <separator/>
-                <filter string="Incoming" name="incoming_cheques" domain="[('type', '=', 'incoming')]"/>
-                <filter string="Outgoing" name="outgoing_cheques" domain="[('type', '=', 'outgoing')]"/>
+                <!-- Type Filters -->
+                <filter name="incoming_cheques" string="Incoming" domain="[('type', '=', 'incoming')]"/>
+                <filter name="outgoing_cheques" string="Outgoing" domain="[('type', '=', 'outgoing')]"/>
                 
+                <!-- Group By Options -->
                 <group expand="0" string="Group By">
-                    <filter string="Partner" name="group_partner" context="{'group_by': 'partner_id'}"/>
-                    <filter string="Bank" name="group_bank" context="{'group_by': 'bank_id'}"/>
-                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
-                    <filter string="Type" name="group_type" context="{'group_by': 'type'}"/>
+                    <filter name="group_partner" string="Partner" context="{'group_by': 'partner_id'}"/>
+                    <filter name="group_bank" string="Bank" context="{'group_by': 'bank_id'}"/>
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_type" string="Type" context="{'group_by': 'type'}"/>
                 </group>
             </search>
         </field>
@@ -37,28 +51,24 @@
         <field name="name">cheque.management.list</field>
         <field name="model">cheque.management</field>
         <field name="arch" type="xml">
-            <tree decoration-info="state == 'draft'" 
-                  decoration-success="state == 'cleared'" 
-                  decoration-warning="state == 'registered'" 
-                  decoration-danger="state == 'returned'"
-                  sample="1">
+            <list>
                 <field name="name"/>
                 <field name="partner_id"/>
                 <field name="bank_id"/>
-                <field name="amount" sum="Total"/>
+                <field name="amount"/>
                 <field name="date"/>
                 <field name="due_date"/>
                 <field name="type"/>
-                <field name="state" widget="badge" 
+                <field name="state" 
                        decoration-info="state == 'draft'" 
                        decoration-success="state == 'cleared'" 
                        decoration-warning="state == 'registered'" 
                        decoration-danger="state == 'returned'"/>
-            </tree>
+            </list>
         </field>
     </record>
 
-    <!-- Form View -->
+    <!-- Updated Form View with state change buttons -->
     <record id="view_cheque_management_form" model="ir.ui.view">
         <field name="name">cheque.management.form</field>
         <field name="model">cheque.management</field>
@@ -66,17 +76,17 @@
             <form>
                 <header>
                     <button name="action_register" string="Register" type="object" 
-                            class="oe_highlight" invisible="state != 'draft'"/>
+                            class="oe_highlight" invisible="[('state', '!=', 'draft')]"/>
                     <button name="action_receive" string="Receive" type="object" 
-                            class="oe_highlight" invisible="state != 'registered'"/>
+                            class="oe_highlight" invisible="[('state', '!=', 'registered')]"/>
                     <button name="action_deposit" string="Deposit" type="object" 
-                            class="oe_highlight" invisible="state != 'received'"/>
+                            class="oe_highlight" invisible="[('state', '!=', 'received')]"/>
                     <button name="action_clear" string="Clear" type="object" 
-                            class="oe_highlight" invisible="state != 'deposited'"/>
+                            class="oe_highlight" invisible="[('state', '!=', 'deposited')]"/>
                     <button name="action_return" string="Return" type="object" 
-                            class="btn-danger" invisible="state != 'deposited'"/>
+                            class="btn-danger" invisible="[('state', '!=', 'deposited')]"/>
                     <button name="action_cancel" string="Cancel" type="object" 
-                            class="btn-secondary" invisible="state not in ['draft', 'registered', 'received']"/>
+                            invisible="[('state', 'not in', ['draft', 'registered', 'received'])]"/>
                     <field name="state" widget="statusbar" 
                            statusbar_visible="draft,registered,received,deposited,cleared"/>
                 </header>
@@ -90,25 +100,25 @@
                         <group>
                             <field name="partner_id"/>
                             <field name="bank_id"/>
-                            <field name="amount" widget="monetary"/>
+                            <field name="amount"/>
                             <field name="type"/>
                         </group>
                         <group>
                             <field name="date"/>
                             <field name="due_date"/>
                             <field name="journal_id"/>
-                            <field name="company_id" groups="base.group_multi_company" optional="show"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
                             <field name="currency_id" invisible="1"/>
                         </group>
                     </group>
                     <notebook>
-                        <page string="Notes" name="notes">
-                            <field name="memo" placeholder="Add a note here..."/>
+                        <page string="Notes">
+                            <field name="memo"/>
                         </page>
                     </notebook>
                 </sheet>
                 <div class="oe_chatter">
-                    <field name="message_follower_ids" groups="base.group_user"/>
+                    <field name="message_follower_ids"/>
                     <field name="activity_ids"/>
                     <field name="message_ids"/>
                 </div>
@@ -120,14 +130,12 @@
     <record id="action_cheque_management" model="ir.actions.act_window">
         <field name="name">Cheque Management</field>
         <field name="res_model">cheque.management</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="view_cheque_management_list"/>
         <field name="search_view_id" ref="view_cheque_management_search"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create your first cheque record!
-            </p>
-            <p>
-                Track and manage all your cheques here.
             </p>
         </field>
     </record>

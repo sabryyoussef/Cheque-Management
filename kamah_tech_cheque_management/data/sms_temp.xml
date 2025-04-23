@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<odoo>
+<openerp>
     <data noupdate="1">
-        <record id="journal_cheques_issued" model="account.journal">
-            <field name="name">Issued Cheques</field>
-            <field name="code">CHKI</field>
+        <record id="issue_check_journal" model="account.journal">
+            <field name="name">Issue Checks</field>
             <field name="type">bank</field>
-            <field name="sequence">30</field>
+            <field name="payment_subtype">issue_check</field>
         </record>
 
-        <record id="journal_cheques_received" model="account.journal">
-            <field name="name">Received Cheques</field>
-            <field name="code">CHKR</field>
+        <record id="rece_check_journal" model="account.journal">
+            <field name="name">Received Checks</field>
             <field name="type">bank</field>
-            <field name="sequence">31</field>
+            <field name="payment_subtype">rece_check</field>
         </record>
+
+
     </data>
-</odoo>
+</openerp>
