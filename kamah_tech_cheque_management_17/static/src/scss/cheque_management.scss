@@ -1,0 +1,16 @@
+.o_form_view {
+    .cheque-management {
+        .o_statusbar_status {
+            .btn-primary {
+                &.returned {
+                    background-color: theme-color('danger');
+                    border-color: theme-color('danger');
+                }
+                &.cleared {
+                    background-color: theme-color('success');
+                    border-color: theme-color('success');
+                }
+            }
+        }
+    }
+}
