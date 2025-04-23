@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Search View -->
+    <record id="view_cheque_management_search" model="ir.ui.view">
+        <field name="name">cheque.management.search</field>
+        <field name="model">cheque.management</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" string="Cheque Number"/>
+                <field name="partner_id" string="Partner"/>
+                <field name="amount" string="Amount"/>
+                
+                <filter string="Cheque Date" name="date_filter" date="date"/>
+                <filter string="Due Date" name="due_date_filter" date="due_date"/>
+                
+                <separator/>
+                <filter string="Draft" name="draft_cheques" domain="[('state', '=', 'draft')]"/>
+                <filter string="Registered" name="registered_cheques" domain="[('state', '=', 'registered')]"/>
+                <filter string="Cleared" name="cleared_cheques" domain="[('state', '=', 'cleared')]"/>
+                
+                <separator/>
+                <filter string="Incoming" name="incoming_cheques" domain="[('type', '=', 'incoming')]"/>
+                <filter string="Outgoing" name="outgoing_cheques" domain="[('type', '=', 'outgoing')]"/>
+                
+                <group expand="0" string="Group By">
+                    <filter string="Partner" name="group_partner" context="{'group_by': 'partner_id'}"/>
+                    <filter string="Bank" name="group_bank" context="{'group_by': 'bank_id'}"/>
+                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                    <filter string="Type" name="group_type" context="{'group_by': 'type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- List View -->
+    <record id="view_cheque_management_list" model="ir.ui.view">
+        <field name="name">cheque.management.list</field>
+        <field name="model">cheque.management</field>
+        <field name="arch" type="xml">
+            <tree decoration-info="state == 'draft'" 
+                  decoration-success="state == 'cleared'" 
+                  decoration-warning="state == 'registered'" 
+                  decoration-danger="state == 'returned'"
+                  sample="1">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="bank_id"/>
+                <field name="amount" sum="Total"/>
+                <field name="date"/>
+                <field name="due_date"/>
+                <field name="type"/>
+                <field name="state" widget="badge" 
+                       decoration-info="state == 'draft'" 
+                       decoration-success="state == 'cleared'" 
+                       decoration-warning="state == 'registered'" 
+                       decoration-danger="state == 'returned'"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_cheque_management_form" model="ir.ui.view">
+        <field name="name">cheque.management.form</field>
+        <field name="model">cheque.management</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_register" string="Register" type="object" 
+                            class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_receive" string="Receive" type="object" 
+                            class="oe_highlight" invisible="state != 'registered'"/>
+                    <button name="action_deposit" string="Deposit" type="object" 
+                            class="oe_highlight" invisible="state != 'received'"/>
+                    <button name="action_clear" string="Clear" type="object" 
+                            class="oe_highlight" invisible="state != 'deposited'"/>
+                    <button name="action_return" string="Return" type="object" 
+                            class="btn-danger" invisible="state != 'deposited'"/>
+                    <button name="action_cancel" string="Cancel" type="object" 
+                            class="btn-secondary" invisible="state not in ['draft', 'registered', 'received']"/>
+                    <field name="state" widget="statusbar" 
+                           statusbar_visible="draft,registered,received,deposited,cleared"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Cheque Number"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="bank_id"/>
+                            <field name="amount" widget="monetary"/>
+                            <field name="type"/>
+                        </group>
+                        <group>
+                            <field name="date"/>
+                            <field name="due_date"/>
+                            <field name="journal_id"/>
+                            <field name="company_id" groups="base.group_multi_company" optional="show"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Notes" name="notes">
+                            <field name="memo" placeholder="Add a note here..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" groups="base.group_user"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_cheque_management" model="ir.actions.act_window">
+        <field name="name">Cheque Management</field>
+        <field name="res_model">cheque.management</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_cheque_management_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first cheque record!
+            </p>
+            <p>
+                Track and manage all your cheques here.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Items -->
+    <menuitem id="menu_cheque_management_root"
+              name="Cheque Management"
+              web_icon="kamah_tech_cheque_management,static/description/icon.png"
+              sequence="10"/>
+
+    <menuitem id="menu_cheque_management"
+              name="Cheques"
+              parent="menu_cheque_management_root"
+              action="action_cheque_management"
+              sequence="1"/>
+</odoo>

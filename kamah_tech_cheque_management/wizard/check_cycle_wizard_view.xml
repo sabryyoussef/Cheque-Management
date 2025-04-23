@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<odoo>
+    <data>
+
+
+        <record id="view_check_cycle_wizard_form" model="ir.ui.view">
+            <field name="name">check.cycle.wizard.form</field>
+            <field name="model">check.cycle.wizard</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <field name="company_id" invisible="1"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="check_ids" invisible="1"/>
+                        <field name="partner_id" readonly="1"/>
+                        <field name="total_amount" widget="monetary"/>
+                        <field name="journal_id" options="{'no_create': True}"/>
+                        <field name="reject_reason" placeholder="Enter rejection reason..." attrs="{'invisible': [('reject_reason', '=', False)], 'required': [('reject_reason', '!=', False)]}"/>
+                    </group>
+                    <footer>
+                        <button string="Deposit" name="action_deposit" type="object" class="btn-primary" data-hotkey="q" 
+                                attrs="{'invisible': [('journal_id', '=', False)]}"/>
+                        <button string="Reject" name="action_reject" type="object" class="btn-danger" data-hotkey="w"
+                                attrs="{'invisible': [('reject_reason', '=', False)]}"/>
+                        <button string="Clear" name="action_clear" type="object" class="btn-success" data-hotkey="e"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel" data-hotkey="z"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_check_cycle_wizard" model="ir.actions.act_window">
+            <field name="name">Check Operations</field>
+            <field name="res_model">check.cycle.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="binding_model_id" ref="model_cheque_management"/>
+            <field name="binding_view_types">list</field>
+        </record>
+
+    </data>
+</odoo>
